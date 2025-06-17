@@ -194,7 +194,7 @@ const BasicCalculator = ({ darkMode }) => {
         </div>
       </div>
 
-      {/* Buttons Grid - Fixed layout */}
+      {/* Buttons Grid */}
       <div className="grid grid-cols-4 gap-3 w-full">
         {buttons.map((row, rowIndex) => 
           row.map((btn, colIndex) => (

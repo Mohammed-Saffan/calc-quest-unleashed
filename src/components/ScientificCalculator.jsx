@@ -233,7 +233,7 @@ const ScientificCalculator = ({ darkMode }) => {
         </div>
       </div>
 
-      {/* Buttons Grid - Fixed layout */}
+      {/* Buttons Grid */}
       <div className="grid grid-cols-4 gap-2 w-full">
         {scientificButtons.map((row, rowIndex) => 
           row.map((btn, colIndex) => (
