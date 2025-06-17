@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Play, RotateCcw, Trophy, Clock, Zap, Target, Award } from 'lucide-react';
 
@@ -169,7 +168,7 @@ const MathGame = ({ darkMode }) => {
                   onClick={() => setDifficulty(level.value)}
                   className={`w-full p-6 rounded-2xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 ${
                     difficulty === level.value
-                      ? `bg-gradient-to-r ${getDifficultyColor(level.value)} text-white shadow-2xl scale-105`
+                      ? `bg-gradient-to-r ${getDifficultyColor(level.value)} text-white shadow-2xl scale-105 ring-4 ring-opacity-50`
                       : 'bg-white dark:bg-gray-700 text-gray-800 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-600 shadow-lg hover:shadow-xl border-2 border-gray-200 dark:border-gray-600'
                   }`}
                 >

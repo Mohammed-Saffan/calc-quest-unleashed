@@ -145,7 +145,7 @@ const BasicCalculator = ({ darkMode }) => {
   };
 
   const getButtonClass = (btn) => {
-    const baseClass = "h-20 rounded-2xl font-bold text-xl transition-all duration-200 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-4 shadow-lg hover:shadow-xl";
+    const baseClass = "h-16 rounded-xl font-bold text-lg transition-all duration-200 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-4 shadow-lg hover:shadow-xl flex items-center justify-center";
     
     if (btn === '=') {
       return `${baseClass} bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white col-span-2 focus:ring-green-300`;
@@ -194,18 +194,20 @@ const BasicCalculator = ({ darkMode }) => {
         </div>
       </div>
 
-      {/* Buttons */}
-      <div className="grid grid-cols-4 gap-4">
-        {buttons.flat().map((btn, index) => (
-          <button
-            key={index}
-            onClick={() => handleButtonClick(btn)}
-            className={getButtonClass(btn)}
-            aria-label={btn === '=' ? 'equals' : btn === '÷' ? 'divide' : btn === '×' ? 'multiply' : btn}
-          >
-            {btn === '=' ? <Equal className="w-7 h-7 mx-auto" /> : btn}
-          </button>
-        ))}
+      {/* Buttons Grid - Fixed layout */}
+      <div className="grid grid-cols-4 gap-3 w-full">
+        {buttons.map((row, rowIndex) => 
+          row.map((btn, colIndex) => (
+            <button
+              key={`${rowIndex}-${colIndex}`}
+              onClick={() => handleButtonClick(btn)}
+              className={getButtonClass(btn)}
+              aria-label={btn === '=' ? 'equals' : btn === '÷' ? 'divide' : btn === '×' ? 'multiply' : btn}
+            >
+              {btn === '=' ? <Equal className="w-6 h-6" /> : btn}
+            </button>
+          ))
+        )}
       </div>
 
       {/* Helpful Tips */}

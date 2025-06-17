@@ -149,7 +149,7 @@ const ScientificCalculator = ({ darkMode }) => {
   };
 
   const getButtonClass = (btn) => {
-    const baseClass = "h-14 rounded-xl font-bold text-sm transition-all duration-200 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-4 shadow-lg hover:shadow-xl";
+    const baseClass = "h-12 rounded-lg font-bold text-sm transition-all duration-200 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-4 shadow-lg hover:shadow-xl flex items-center justify-center";
     
     if (btn === '=') {
       return `${baseClass} bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white focus:ring-green-300`;
@@ -233,19 +233,21 @@ const ScientificCalculator = ({ darkMode }) => {
         </div>
       </div>
 
-      {/* Buttons */}
-      <div className="grid grid-cols-4 gap-3">
-        {scientificButtons.flat().map((btn, index) => (
-          <button
-            key={index}
-            onClick={() => handleButtonClick(btn)}
-            className={getButtonClass(btn)}
-            aria-label={btn}
-            title={btn === 'M+' ? 'Add to memory' : btn === 'MC' ? 'Clear memory' : btn}
-          >
-            {btn}
-          </button>
-        ))}
+      {/* Buttons Grid - Fixed layout */}
+      <div className="grid grid-cols-4 gap-2 w-full">
+        {scientificButtons.map((row, rowIndex) => 
+          row.map((btn, colIndex) => (
+            <button
+              key={`${rowIndex}-${colIndex}`}
+              onClick={() => handleButtonClick(btn)}
+              className={getButtonClass(btn)}
+              aria-label={btn}
+              title={btn === 'M+' ? 'Add to memory' : btn === 'MC' ? 'Clear memory' : btn}
+            >
+              {btn}
+            </button>
+          ))
+        )}
       </div>
 
       {/* Tips */}
