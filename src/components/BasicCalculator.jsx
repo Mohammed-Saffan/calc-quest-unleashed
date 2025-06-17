@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Delete, Equal } from 'lucide-react';
+import { Delete, Equal, RotateCcw } from 'lucide-react';
 
 const BasicCalculator = ({ darkMode }) => {
   const [display, setDisplay] = useState('0');
@@ -145,18 +145,18 @@ const BasicCalculator = ({ darkMode }) => {
   };
 
   const getButtonClass = (btn) => {
-    const baseClass = "h-16 rounded-xl font-semibold text-xl transition-all duration-200 transform hover:scale-105 active:scale-95";
+    const baseClass = "h-20 rounded-2xl font-bold text-xl transition-all duration-200 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-4 shadow-lg hover:shadow-xl";
     
     if (btn === '=') {
-      return `${baseClass} bg-blue-500 hover:bg-blue-600 text-white shadow-lg col-span-2`;
+      return `${baseClass} bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white col-span-2 focus:ring-green-300`;
     } else if (['÷', '×', '-', '+'].includes(btn)) {
-      return `${baseClass} bg-orange-500 hover:bg-orange-600 text-white shadow-lg`;
+      return `${baseClass} bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white focus:ring-orange-300`;
     } else if (['C', '±', '%'].includes(btn)) {
-      return `${baseClass} bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 text-gray-800 dark:text-white`;
+      return `${baseClass} bg-gradient-to-r from-gray-400 to-gray-500 dark:from-gray-600 dark:to-gray-700 hover:from-gray-500 hover:to-gray-600 dark:hover:from-gray-500 dark:hover:to-gray-600 text-white focus:ring-gray-300`;
     } else if (btn === '0') {
-      return `${baseClass} bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-white col-span-2`;
+      return `${baseClass} bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-gray-700 dark:to-gray-600 hover:from-blue-200 hover:to-indigo-200 dark:hover:from-gray-600 dark:hover:to-gray-500 text-gray-800 dark:text-white col-span-2 focus:ring-blue-300`;
     } else {
-      return `${baseClass} bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-white`;
+      return `${baseClass} bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-gray-700 dark:to-gray-600 hover:from-blue-200 hover:to-indigo-200 dark:hover:from-gray-600 dark:hover:to-gray-500 text-gray-800 dark:text-white focus:ring-blue-300`;
     }
   };
 
@@ -175,31 +175,48 @@ const BasicCalculator = ({ darkMode }) => {
   };
 
   return (
-    <div className="max-w-md mx-auto">
-      <div className="mb-6">
-        <div className="text-right text-gray-500 dark:text-gray-400 text-lg mb-2 h-8 overflow-hidden">
-          {equation}
+    <div className="max-w-md mx-auto space-y-8">
+      {/* Header */}
+      <div className="text-center space-y-2">
+        <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          Basic Calculator
+        </h2>
+        <p className="text-gray-600 dark:text-gray-400">Perfect for everyday calculations</p>
+      </div>
+
+      {/* Display */}
+      <div className="space-y-4">
+        <div className="text-right text-gray-500 dark:text-gray-400 text-lg h-8 overflow-hidden bg-gradient-to-r from-gray-50 to-blue-50 dark:from-gray-800 dark:to-gray-700 rounded-xl px-4 py-2 border border-gray-200 dark:border-gray-600">
+          {equation || 'Ready to calculate...'}
         </div>
-        <div className="text-right text-4xl font-bold text-gray-800 dark:text-white p-4 bg-gray-50 dark:bg-gray-900 rounded-xl min-h-[80px] flex items-center justify-end overflow-hidden">
+        <div className="text-right text-5xl font-bold text-gray-800 dark:text-white p-6 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl min-h-[100px] flex items-center justify-end overflow-hidden shadow-inner border-2 border-gray-200 dark:border-gray-600">
           {display}
         </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-3">
+      {/* Buttons */}
+      <div className="grid grid-cols-4 gap-4">
         {buttons.flat().map((btn, index) => (
           <button
             key={index}
             onClick={() => handleButtonClick(btn)}
             className={getButtonClass(btn)}
+            aria-label={btn === '=' ? 'equals' : btn === '÷' ? 'divide' : btn === '×' ? 'multiply' : btn}
           >
-            {btn === '=' && <Equal className="w-6 h-6 mx-auto" />}
-            {btn !== '=' && btn}
+            {btn === '=' ? <Equal className="w-7 h-7 mx-auto" /> : btn}
           </button>
         ))}
       </div>
 
-      <div className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
-        💡 Use your keyboard for faster input!
+      {/* Helpful Tips */}
+      <div className="text-center space-y-2 p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
+        <div className="flex items-center justify-center space-x-2">
+          <span className="text-2xl">⌨️</span>
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Keyboard shortcuts available!</span>
+        </div>
+        <p className="text-xs text-gray-600 dark:text-gray-400">
+          Use number keys, +, -, *, /, Enter (=), Escape (C), Backspace
+        </p>
       </div>
     </div>
   );

@@ -1,11 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
+import { RotateCcw, Zap, Calculator } from 'lucide-react';
 
 const ScientificCalculator = ({ darkMode }) => {
   const [display, setDisplay] = useState('0');
   const [equation, setEquation] = useState('');
   const [memory, setMemory] = useState(0);
-  const [angleMode, setAngleMode] = useState('deg'); // deg or rad
+  const [angleMode, setAngleMode] = useState('deg');
 
   const scientificButtons = [
     ['C', '(', ')', '÷'],
@@ -69,7 +70,6 @@ const ScientificCalculator = ({ darkMode }) => {
         .replace(/π/g, Math.PI)
         .replace(/e/g, Math.E);
 
-      // Handle scientific functions
       expression = expression.replace(/sin\(/g, angleMode === 'deg' ? 'Math.sin(Math.PI/180*' : 'Math.sin(');
       expression = expression.replace(/cos\(/g, angleMode === 'deg' ? 'Math.cos(Math.PI/180*' : 'Math.cos(');
       expression = expression.replace(/tan\(/g, angleMode === 'deg' ? 'Math.tan(Math.PI/180*' : 'Math.tan(');
@@ -79,8 +79,9 @@ const ScientificCalculator = ({ darkMode }) => {
       expression = expression.replace(/(\d+\.?\d*)²/g, 'Math.pow($1,2)');
       
       const result = eval(expression);
-      setDisplay(result.toString());
-      setEquation(equation + ' = ' + result);
+      const roundedResult = Math.round(result * 1000000000) / 1000000000;
+      setDisplay(roundedResult.toString());
+      setEquation(equation + ' = ' + roundedResult);
     } catch (error) {
       setDisplay('Error');
       setTimeout(() => {
@@ -142,23 +143,24 @@ const ScientificCalculator = ({ darkMode }) => {
         return;
     }
 
-    setDisplay(result.toString());
-    setEquation(equation + func + '(' + currentValue + ') = ' + result);
+    const roundedResult = Math.round(result * 1000000000) / 1000000000;
+    setDisplay(roundedResult.toString());
+    setEquation(equation + func + '(' + currentValue + ') = ' + roundedResult);
   };
 
   const getButtonClass = (btn) => {
-    const baseClass = "h-12 rounded-lg font-semibold text-sm transition-all duration-200 transform hover:scale-105 active:scale-95";
+    const baseClass = "h-14 rounded-xl font-bold text-sm transition-all duration-200 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-4 shadow-lg hover:shadow-xl";
     
     if (btn === '=') {
-      return `${baseClass} bg-blue-500 hover:bg-blue-600 text-white shadow-lg`;
+      return `${baseClass} bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white focus:ring-green-300`;
     } else if (['÷', '×', '-', '+'].includes(btn)) {
-      return `${baseClass} bg-orange-500 hover:bg-orange-600 text-white shadow-lg`;
+      return `${baseClass} bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white focus:ring-orange-300`;
     } else if (['sin', 'cos', 'tan', 'log', 'ln', '√', 'x²', 'xʸ'].includes(btn)) {
-      return `${baseClass} bg-purple-500 hover:bg-purple-600 text-white shadow-lg`;
+      return `${baseClass} bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white focus:ring-purple-300`;
     } else if (['C', '(', ')', '±', 'π', 'e', 'M+', 'MC'].includes(btn)) {
-      return `${baseClass} bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 text-gray-800 dark:text-white`;
+      return `${baseClass} bg-gradient-to-r from-gray-400 to-gray-500 dark:from-gray-600 dark:to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white focus:ring-gray-300`;
     } else {
-      return `${baseClass} bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-white`;
+      return `${baseClass} bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-gray-700 dark:to-gray-600 hover:from-blue-200 hover:to-indigo-200 dark:hover:from-gray-600 dark:hover:to-gray-500 text-gray-800 dark:text-white focus:ring-blue-300`;
     }
   };
 
@@ -175,60 +177,86 @@ const ScientificCalculator = ({ darkMode }) => {
   };
 
   return (
-    <div className="max-w-lg mx-auto">
-      <div className="mb-4 flex justify-between items-center">
+    <div className="max-w-2xl mx-auto space-y-8">
+      {/* Header */}
+      <div className="text-center space-y-2">
+        <div className="flex items-center justify-center space-x-2">
+          <Zap className="w-8 h-8 text-purple-600" />
+          <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+            Scientific Calculator
+          </h2>
+        </div>
+        <p className="text-gray-600 dark:text-gray-400">Advanced mathematical functions</p>
+      </div>
+
+      {/* Controls */}
+      <div className="flex justify-between items-center flex-wrap gap-4">
         <div className="flex space-x-2">
           <button
             onClick={() => setAngleMode('deg')}
-            className={`px-3 py-1 rounded text-sm font-medium ${
+            className={`px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 focus:outline-none focus:ring-4 ${
               angleMode === 'deg'
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-white'
+                ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg focus:ring-blue-300'
+                : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-500 focus:ring-gray-300'
             }`}
           >
             DEG
           </button>
           <button
             onClick={() => setAngleMode('rad')}
-            className={`px-3 py-1 rounded text-sm font-medium ${
+            className={`px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 focus:outline-none focus:ring-4 ${
               angleMode === 'rad'
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-white'
+                ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg focus:ring-blue-300'
+                : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-500 focus:ring-gray-300'
             }`}
           >
             RAD
           </button>
         </div>
         {memory !== 0 && (
-          <div className="text-sm text-gray-500 dark:text-gray-400">
-            Memory: {memory}
+          <div className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-yellow-100 to-orange-100 dark:from-yellow-900/30 dark:to-orange-900/30 rounded-xl border border-yellow-200 dark:border-yellow-800">
+            <Calculator className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+            <span className="text-sm font-medium text-yellow-700 dark:text-yellow-300">
+              Memory: {memory}
+            </span>
           </div>
         )}
       </div>
 
-      <div className="mb-6">
-        <div className="text-right text-gray-500 dark:text-gray-400 text-sm mb-2 h-6 overflow-hidden">
-          {equation}
+      {/* Display */}
+      <div className="space-y-4">
+        <div className="text-right text-gray-500 dark:text-gray-400 text-sm h-8 overflow-hidden bg-gradient-to-r from-gray-50 to-purple-50 dark:from-gray-800 dark:to-purple-900/20 rounded-xl px-4 py-2 border border-gray-200 dark:border-gray-600">
+          {equation || 'Enter your calculation...'}
         </div>
-        <div className="text-right text-3xl font-bold text-gray-800 dark:text-white p-4 bg-gray-50 dark:bg-gray-900 rounded-xl min-h-[70px] flex items-center justify-end overflow-hidden">
+        <div className="text-right text-4xl font-bold text-gray-800 dark:text-white p-6 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl min-h-[90px] flex items-center justify-end overflow-hidden shadow-inner border-2 border-gray-200 dark:border-gray-600">
           {display}
         </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-2">
+      {/* Buttons */}
+      <div className="grid grid-cols-4 gap-3">
         {scientificButtons.flat().map((btn, index) => (
           <button
             key={index}
             onClick={() => handleButtonClick(btn)}
             className={getButtonClass(btn)}
+            aria-label={btn}
+            title={btn === 'M+' ? 'Add to memory' : btn === 'MC' ? 'Clear memory' : btn}
           >
             {btn}
           </button>
         ))}
       </div>
 
-      <div className="mt-4 text-center text-xs text-gray-500 dark:text-gray-400">
-        🧮 Advanced mathematical functions at your fingertips
+      {/* Tips */}
+      <div className="text-center space-y-2 p-4 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-xl border border-purple-200 dark:border-purple-800">
+        <div className="flex items-center justify-center space-x-2">
+          <Zap className="w-5 h-5 text-purple-600" />
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Pro Features</span>
+        </div>
+        <p className="text-xs text-gray-600 dark:text-gray-400">
+          Switch between DEG/RAD • Memory functions • Parentheses support
+        </p>
       </div>
     </div>
   );

@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
-import { Play, RotateCcw, Trophy, Clock } from 'lucide-react';
+import { Play, RotateCcw, Trophy, Clock, Zap, Target, Award } from 'lucide-react';
 
 const MathGame = ({ darkMode }) => {
-  const [gameState, setGameState] = useState('menu'); // menu, playing, finished
+  const [gameState, setGameState] = useState('menu');
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(60);
   const [currentProblem, setCurrentProblem] = useState(null);
@@ -12,6 +12,8 @@ const MathGame = ({ darkMode }) => {
   const [streak, setStreak] = useState(0);
   const [bestScore, setBestScore] = useState(parseInt(localStorage.getItem('mathGameBestScore')) || 0);
   const [feedback, setFeedback] = useState('');
+  const [totalAnswered, setTotalAnswered] = useState(0);
+  const [correctAnswers, setCorrectAnswers] = useState(0);
 
   useEffect(() => {
     let timer;
@@ -50,7 +52,6 @@ const MathGame = ({ darkMode }) => {
         break;
     }
 
-    // Ensure subtraction doesn't go negative for easier difficulties
     if (operation === '-' && difficulty === 'easy' && num2 > num1) {
       [num1, num2] = [num2, num1];
     }
@@ -78,6 +79,8 @@ const MathGame = ({ darkMode }) => {
     setCurrentProblem(null);
     setUserAnswer('');
     setFeedback('');
+    setTotalAnswered(0);
+    setCorrectAnswers(0);
   };
 
   const endGame = () => {
@@ -90,12 +93,15 @@ const MathGame = ({ darkMode }) => {
 
   const submitAnswer = () => {
     const answer = parseInt(userAnswer);
+    setTotalAnswered(totalAnswered + 1);
+    
     if (answer === currentProblem.answer) {
       const points = difficulty === 'easy' ? 1 : difficulty === 'medium' ? 2 : 3;
       const bonusPoints = streak >= 5 ? Math.floor(streak / 5) : 0;
       setScore(score + points + bonusPoints);
       setStreak(streak + 1);
-      setFeedback('🎉 Correct!');
+      setCorrectAnswers(correctAnswers + 1);
+      setFeedback('🎉 Correct! +' + (points + bonusPoints) + ' points');
     } else {
       setStreak(0);
       setFeedback(`❌ Wrong! Answer was ${currentProblem.answer}`);
@@ -119,82 +125,132 @@ const MathGame = ({ darkMode }) => {
     return () => document.removeEventListener('keydown', handleKeyPress);
   }, [userAnswer, gameState]);
 
+  const getDifficultyColor = (level) => {
+    switch (level) {
+      case 'easy': return 'from-green-500 to-emerald-600';
+      case 'medium': return 'from-yellow-500 to-orange-600';
+      case 'hard': return 'from-red-500 to-pink-600';
+      default: return 'from-blue-500 to-purple-600';
+    }
+  };
+
+  const getAccuracy = () => {
+    return totalAnswered > 0 ? Math.round((correctAnswers / totalAnswered) * 100) : 0;
+  };
+
   if (gameState === 'menu') {
     return (
-      <div className="text-center max-w-md mx-auto">
-        <div className="mb-8">
-          <Trophy className="w-16 h-16 mx-auto text-yellow-500 mb-4" />
-          <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">Math Practice Game</h2>
-          <p className="text-gray-600 dark:text-gray-300">Test your mental math skills!</p>
-        </div>
-
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold mb-3 text-gray-800 dark:text-white">Select Difficulty</h3>
-          <div className="space-y-2">
-            {[
-              { value: 'easy', label: 'Easy (1-10)', points: '1 point per correct answer' },
-              { value: 'medium', label: 'Medium (1-50)', points: '2 points per correct answer' },
-              { value: 'hard', label: 'Hard (1-100)', points: '3 points per correct answer' }
-            ].map((level) => (
-              <button
-                key={level.value}
-                onClick={() => setDifficulty(level.value)}
-                className={`w-full p-4 rounded-xl transition-all duration-200 ${
-                  difficulty === level.value
-                    ? 'bg-blue-500 text-white shadow-lg transform scale-105'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
-                }`}
-              >
-                <div className="font-semibold">{level.label}</div>
-                <div className="text-sm opacity-75">{level.points}</div>
-              </button>
-            ))}
+      <div className="text-center max-w-lg mx-auto space-y-8">
+        <div className="space-y-4">
+          <div className="flex items-center justify-center space-x-3">
+            <Trophy className="w-12 h-12 text-yellow-500" />
+            <h2 className="text-4xl font-bold bg-gradient-to-r from-yellow-500 to-orange-600 bg-clip-text text-transparent">
+              Math Challenge
+            </h2>
+            <Trophy className="w-12 h-12 text-yellow-500" />
           </div>
+          <p className="text-gray-600 dark:text-gray-300 text-lg">Test your mental math skills in 60 seconds!</p>
         </div>
 
-        {bestScore > 0 && (
-          <div className="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl">
-            <div className="text-yellow-600 dark:text-yellow-400 font-semibold">
-              🏆 Best Score: {bestScore}
+        <div className="space-y-6">
+          <div>
+            <h3 className="text-xl font-bold mb-4 text-gray-800 dark:text-white flex items-center justify-center space-x-2">
+              <Target className="w-6 h-6" />
+              <span>Choose Your Challenge</span>
+            </h3>
+            <div className="space-y-3">
+              {[
+                { value: 'easy', label: 'Easy Mode', range: '1-10', points: '1 point per correct', icon: '🟢' },
+                { value: 'medium', label: 'Medium Mode', range: '1-50', points: '2 points per correct', icon: '🟡' },
+                { value: 'hard', label: 'Hard Mode', range: '1-100', points: '3 points per correct', icon: '🔴' }
+              ].map((level) => (
+                <button
+                  key={level.value}
+                  onClick={() => setDifficulty(level.value)}
+                  className={`w-full p-6 rounded-2xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 ${
+                    difficulty === level.value
+                      ? `bg-gradient-to-r ${getDifficultyColor(level.value)} text-white shadow-2xl scale-105`
+                      : 'bg-white dark:bg-gray-700 text-gray-800 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-600 shadow-lg hover:shadow-xl border-2 border-gray-200 dark:border-gray-600'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="text-left">
+                      <div className="flex items-center space-x-2 text-lg font-bold">
+                        <span>{level.icon}</span>
+                        <span>{level.label}</span>
+                      </div>
+                      <div className="text-sm opacity-90 mt-1">Numbers: {level.range}</div>
+                      <div className="text-xs opacity-75 mt-1">{level.points}</div>
+                    </div>
+                    <Award className="w-8 h-8 opacity-50" />
+                  </div>
+                </button>
+              ))}
             </div>
           </div>
-        )}
 
-        <button
-          onClick={startGame}
-          className="bg-green-500 hover:bg-green-600 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg transform hover:scale-105 transition-all duration-200 flex items-center justify-center space-x-2 w-full"
-        >
-          <Play className="w-6 h-6" />
-          <span>Start Game</span>
-        </button>
+          {bestScore > 0 && (
+            <div className="p-6 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-2xl border-2 border-yellow-200 dark:border-yellow-800">
+              <div className="flex items-center justify-center space-x-2">
+                <Trophy className="w-6 h-6 text-yellow-600" />
+                <span className="text-yellow-700 dark:text-yellow-300 font-bold text-lg">
+                  Best Score: {bestScore} points
+                </span>
+              </div>
+            </div>
+          )}
+
+          <button
+            onClick={startGame}
+            className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-8 py-6 rounded-2xl font-bold text-xl shadow-2xl transform hover:scale-105 transition-all duration-300 flex items-center justify-center space-x-3 focus:outline-none focus:ring-4 focus:ring-blue-300"
+          >
+            <Play className="w-8 h-8" />
+            <span>Start Challenge</span>
+            <Zap className="w-8 h-8" />
+          </button>
+        </div>
       </div>
     );
   }
 
   if (gameState === 'playing') {
     return (
-      <div className="text-center max-w-md mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <div className="bg-blue-100 dark:bg-blue-900 px-4 py-2 rounded-xl">
-            <div className="text-blue-600 dark:text-blue-400 font-bold">Score: {score}</div>
+      <div className="text-center max-w-lg mx-auto space-y-8">
+        {/* Game Stats */}
+        <div className="grid grid-cols-3 gap-4">
+          <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-3 rounded-2xl shadow-lg">
+            <div className="text-2xl font-bold">{score}</div>
+            <div className="text-xs opacity-90">Score</div>
           </div>
-          <div className="bg-red-100 dark:bg-red-900 px-4 py-2 rounded-xl flex items-center space-x-2">
-            <Clock className="w-4 h-4 text-red-600 dark:text-red-400" />
-            <div className="text-red-600 dark:text-red-400 font-bold">{timeLeft}s</div>
+          <div className="bg-gradient-to-r from-red-500 to-pink-600 text-white px-4 py-3 rounded-2xl shadow-lg flex items-center justify-center space-x-2">
+            <Clock className="w-5 h-5" />
+            <div>
+              <div className="text-2xl font-bold">{timeLeft}</div>
+              <div className="text-xs opacity-90">Seconds</div>
+            </div>
+          </div>
+          <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-3 rounded-2xl shadow-lg">
+            <div className="text-2xl font-bold">{getAccuracy()}%</div>
+            <div className="text-xs opacity-90">Accuracy</div>
           </div>
         </div>
 
-        {streak >= 5 && (
-          <div className="mb-4 p-3 bg-purple-100 dark:bg-purple-900 rounded-xl">
-            <div className="text-purple-600 dark:text-purple-400 font-semibold">
-              🔥 {streak} Streak! Bonus points active!
+        {/* Streak Indicator */}
+        {streak >= 3 && (
+          <div className="p-4 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 rounded-2xl border-2 border-purple-200 dark:border-purple-700 animate-pulse">
+            <div className="flex items-center justify-center space-x-2">
+              <Zap className="w-6 h-6 text-purple-600" />
+              <span className="text-purple-700 dark:text-purple-300 font-bold text-lg">
+                🔥 {streak} Streak! {streak >= 5 ? 'Bonus points active!' : ''}
+              </span>
             </div>
           </div>
         )}
 
+        {/* Problem Display */}
         {currentProblem && (
-          <div className="mb-8">
-            <div className="text-6xl font-bold text-gray-800 dark:text-white mb-6 bg-gray-50 dark:bg-gray-900 rounded-2xl py-8">
+          <div className="space-y-6">
+            <div className="text-7xl font-bold text-gray-800 dark:text-white bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-3xl py-12 px-6 shadow-2xl border-4 border-gray-200 dark:border-gray-600">
               {currentProblem.num1} {currentProblem.operation} {currentProblem.num2} = ?
             </div>
             
@@ -202,26 +258,27 @@ const MathGame = ({ darkMode }) => {
               type="number"
               value={userAnswer}
               onChange={(e) => setUserAnswer(e.target.value)}
-              className="w-full text-4xl text-center p-4 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-              placeholder="Your answer"
+              className="w-full text-5xl text-center p-6 border-4 border-blue-300 dark:border-blue-600 rounded-2xl focus:border-blue-500 focus:outline-none dark:bg-gray-700 dark:text-white shadow-lg bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-700"
+              placeholder="?"
               autoFocus
             />
             
             <button
               onClick={submitAnswer}
               disabled={!userAnswer}
-              className="w-full mt-4 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-6 py-3 rounded-xl font-bold text-lg transition-all duration-200"
+              className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed text-white px-8 py-4 rounded-2xl font-bold text-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300"
             >
               Submit Answer
             </button>
           </div>
         )}
 
+        {/* Feedback */}
         {feedback && (
-          <div className={`p-4 rounded-xl font-bold text-lg ${
+          <div className={`p-6 rounded-2xl font-bold text-xl shadow-lg animate-bounce ${
             feedback.includes('Correct') 
-              ? 'bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400'
-              : 'bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400'
+              ? 'bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 text-green-700 dark:text-green-300 border-2 border-green-200 dark:border-green-700'
+              : 'bg-gradient-to-r from-red-100 to-pink-100 dark:from-red-900/30 dark:to-pink-900/30 text-red-700 dark:text-red-300 border-2 border-red-200 dark:border-red-700'
           }`}>
             {feedback}
           </div>
@@ -231,40 +288,69 @@ const MathGame = ({ darkMode }) => {
   }
 
   if (gameState === 'finished') {
+    const isNewRecord = score === bestScore && score > 0;
+    
     return (
-      <div className="text-center max-w-md mx-auto">
-        <div className="mb-8">
-          <Trophy className="w-20 h-20 mx-auto text-yellow-500 mb-4" />
-          <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">Time's Up!</h2>
-          <div className="text-6xl font-bold text-blue-500 mb-2">{score}</div>
-          <p className="text-gray-600 dark:text-gray-300">Final Score</p>
-        </div>
-
-        {score === bestScore && score > 0 && (
-          <div className="mb-6 p-4 bg-yellow-100 dark:bg-yellow-900 rounded-xl">
-            <div className="text-yellow-600 dark:text-yellow-400 font-bold text-lg">
-              🎉 New Best Score!
+      <div className="text-center max-w-lg mx-auto space-y-8">
+        <div className="space-y-6">
+          <div className="flex items-center justify-center space-x-4">
+            <Trophy className={`w-16 h-16 ${isNewRecord ? 'text-yellow-500 animate-bounce' : 'text-gray-400'}`} />
+            <div>
+              <h2 className="text-4xl font-bold text-gray-800 dark:text-white">Challenge Complete!</h2>
+              <div className="text-8xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent mt-2">
+                {score}
+              </div>
+              <p className="text-gray-600 dark:text-gray-300 text-lg">Final Score</p>
             </div>
           </div>
-        )}
 
-        <div className="mb-6 space-y-2 text-gray-600 dark:text-gray-300">
-          <div>Difficulty: <span className="font-semibold capitalize">{difficulty}</span></div>
-          <div>Best Score: <span className="font-semibold">{bestScore}</span></div>
+          {isNewRecord && (
+            <div className="p-6 bg-gradient-to-r from-yellow-100 to-orange-100 dark:from-yellow-900/30 dark:to-orange-900/30 rounded-2xl border-2 border-yellow-200 dark:border-yellow-700 animate-pulse">
+              <div className="flex items-center justify-center space-x-2">
+                <Award className="w-8 h-8 text-yellow-600" />
+                <span className="text-yellow-700 dark:text-yellow-300 font-bold text-xl">
+                  🎉 New Best Score!
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Game Statistics */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
+              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{totalAnswered}</div>
+              <div className="text-sm text-blue-700 dark:text-blue-300">Problems Attempted</div>
+            </div>
+            <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl border border-green-200 dark:border-green-800">
+              <div className="text-2xl font-bold text-green-600 dark:text-green-400">{getAccuracy()}%</div>
+              <div className="text-sm text-green-700 dark:text-green-300">Accuracy Rate</div>
+            </div>
+          </div>
+
+          <div className="space-y-2 text-gray-600 dark:text-gray-300">
+            <div className="flex justify-between">
+              <span>Difficulty:</span>
+              <span className="font-semibold capitalize">{difficulty}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Best Score:</span>
+              <span className="font-semibold">{bestScore}</span>
+            </div>
+          </div>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-4">
           <button
             onClick={startGame}
-            className="w-full bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-xl font-bold text-lg shadow-lg transform hover:scale-105 transition-all duration-200 flex items-center justify-center space-x-2"
+            className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-8 py-4 rounded-2xl font-bold text-xl shadow-2xl transform hover:scale-105 transition-all duration-300 flex items-center justify-center space-x-3 focus:outline-none focus:ring-4 focus:ring-green-300"
           >
-            <RotateCcw className="w-5 h-5" />
+            <RotateCcw className="w-6 h-6" />
             <span>Play Again</span>
           </button>
           
           <button
             onClick={() => setGameState('menu')}
-            className="w-full bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-xl font-bold text-lg transition-all duration-200"
+            className="w-full bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-gray-300"
           >
             Back to Menu
           </button>
